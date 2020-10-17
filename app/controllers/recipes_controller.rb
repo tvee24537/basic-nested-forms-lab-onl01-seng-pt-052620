@@ -1,5 +1,6 @@
-
 class RecipesController < ApplicationController
+  before_action :recipe_params, only: [:create]
+
   def show
     @recipe = Recipe.find(params[:id])
   end
@@ -10,17 +11,22 @@ class RecipesController < ApplicationController
 
   def new
     @recipe = Recipe.new
-    @recipe.ingredients.build
+    2.times { @recipe.ingredients.build(recipe_id: @recipe.id) }
+
   end
 
   def create
-    Recipe.create(recipes_params)
-    redirect_to recipes_path
+    @recipe = Recipe.new(recipe_params)
+    if @recipe.save
+      redirect_to recipe_path(@recipe)
+    else
+      render :new
+    end
   end
 
   private
 
-  def recipes_params
+  def recipe_params
     params.require(:recipe).permit(:title, ingredients_attributes: [:name, :quantity])
   end
 end
